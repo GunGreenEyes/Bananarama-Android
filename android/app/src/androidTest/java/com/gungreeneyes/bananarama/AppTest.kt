@@ -83,7 +83,8 @@ class AppTest {
         val intent = Intent(ctx, MainActivity::class.java).setAction(Intent.ACTION_PROCESS_TEXT).setType("text/plain")
             .putExtra(Intent.EXTRA_PROCESS_TEXT, "a test fox in a library, 16:9")
         ActivityScenario.launch<MainActivity>(intent).use { scenario ->
-            val got = pollJs(scenario, "JSON.stringify([document.getElementById('prompt') && document.getElementById('prompt').value, document.getElementById('ratio') && document.getElementById('ratio').value])")
+            // wait for the quick screen (its close button), not the home screen shown while the page boots
+            val got = pollJs(scenario, "document.querySelector('[data-act=back-to-app]') ? JSON.stringify([document.getElementById('prompt').value, document.getElementById('ratio').value]) : null")
             assertEquals("[\"a test fox in a library\",\"16:9\"]", got)
         }
     }
