@@ -2,140 +2,107 @@
 
 <h1 align="center">Bananarama for Android</h1>
 
-<p align="center"><b>Gemini "Nano Banana" images on your phone: from a notification, the share sheet, a home-screen widget, or <code>/image</code> in Claude Code.</b><br>
-The Android sibling of <a href="https://github.com/GunGreenEyes/Bananarama">Bananarama for Windows</a>. Same JavaScript middleware, running in the background in Termux. Built for the Galaxy S25, works on any Android 8+ phone.</p>
+<p align="center"><b>Select text in Claude → <i>Make image</i>. Get a Gemini "Nano Banana" picture in your Gallery.</b><br>
+The Android sibling of <a href="https://github.com/GunGreenEyes/Bananarama">Bananarama for Windows</a>. One-tap install, built for the Galaxy S25, works on Android 8+.</p>
 
 <p align="center">
-  <a href="#install"><b>Install</b></a> ·
+  <a href="https://github.com/GunGreenEyes/Bananarama-Android/releases/latest/download/Bananarama.apk"><b>⬇ Download Bananarama.apk</b></a> ·
   <a href="https://gungreeneyes.github.io/Bananarama-Android/">Website</a> ·
-  <a href="#use-it">Use it</a> ·
-  <a href="#galaxy-s25-keep-it-running">Galaxy tips</a> ·
+  <a href="#use-it-with-claude">Use it with Claude</a> ·
   <a href="#development">Development</a>
 </p>
 
 ---
 
-## Install
+## Install (one tap)
 
-You need four free apps from **F-Droid** (or their GitHub releases). The Play Store build of Termux is outdated and
-doesn't work with the add-ons:
+1. On your phone, open **[Bananarama.apk](https://github.com/GunGreenEyes/Bananarama-Android/releases/latest/download/Bananarama.apk)** and tap **Install**.
+   The first time, Android asks you to allow installs from your browser (Settings → *Install unknown apps*). Allow it once.
+2. Open **Bananarama**. A short setup asks for the one thing it needs, a **Gemini API key**.
+   Tap **Get a free key from Google**, copy the key, paste it, and Bananarama checks it with Google.
+3. Allow **notifications**, so finished pictures show up even when you've gone back to Claude.
 
-| app | why |
+That's it. Images are saved to **Pictures/Nano** and appear in the Gallery. Making images needs billing turned on
+for the key's Google Cloud project; Google charges a few cents per image.
+
+**Update:** install a newer `Bananarama.apk` over the old one; your settings stay.
+**Uninstall:** long-press the icon → Uninstall. Your images stay in Pictures/Nano.
+
+## Use it with Claude
+
+Bananarama hooks into Android's own features, so it works from the **Claude app** and everywhere else:
+
+| how | what happens |
 |---|---|
-| [Termux](https://f-droid.org/packages/com.termux/) | runs Node.js and the middleware |
-| [Termux:API](https://f-droid.org/packages/com.termux.api/) | notifications, dialogs, Gallery scan, sharing |
-| [Termux:Boot](https://f-droid.org/packages/com.termux.boot/) | starts Bananarama when the phone boots (open it once after installing) |
-| [Termux:Widget](https://f-droid.org/packages/com.termux.widget/) | optional: home-screen buttons |
+| **Select text → Make image** | In Claude, long-press a reply, select the description, tap **Make image** (or ⋮ → Make image). Confirm, and you're back in Claude while it draws. |
+| **Share → Bananarama** | Share any text to Bananarama to draw it. Share a **photo** to edit it ("add a tiny crown"). |
+| **Quick Settings tile** | Pull down twice → **New image**. Setup offers to add the tile. |
+| **Home-screen shortcut** | Long-press the Bananarama icon → **New image**, or add it to the home screen. |
+| **Claude Code in Termux** *(optional)* | Turn on **Settings → Claude Code link**, then run the Termux installer below to get `/image` and `/bananarama` in Claude Code. |
 
-Then open Termux and paste:
-
-```sh
-curl -fsSL https://raw.githubusercontent.com/GunGreenEyes/Bananarama-Android/main/install.sh | bash
-```
-
-The installer does the following:
-- installs Node.js and the Termux tools
-- asks for storage access, so images land in **Pictures/Nano** and show up in the Gallery
-- sets up start-at-boot, the widgets and the share sheet
-- asks for your Gemini API key from [AI Studio](https://aistudio.google.com/apikey), in a dialog
-- starts the background service
-
-Image models need billing enabled on the key's Google Cloud project.
-
-Run the same command again to **update**; it installs the latest release. `bananarama uninstall` removes everything
-except your settings (`~/.config/Bananarama`) and your images.
-
-## Use it
-
-| where | what |
-|---|---|
-| **Notification** | *Bananarama · Ready* stays in the shade while the service runs: **New image**, **Settings**, **Stop**. Tap it for the full menu (test image, last image, health check, restart). |
-| **Share sheet** | In any app, including the Claude app, select text and **Share → Termux** to turn it into an image. Share a **photo** to Termux, then type what to change, to edit it. |
-| **Widget** | Termux:Widget → *Bananarama - New image / Test image / Menu / Settings*. |
-| **Claude Code** | In Termux (`npm i -g @anthropic-ai/claude-code`): type `/image a fox in a library, 16:9` or `/bananarama` for a self-check. |
-| **Terminal** | `bananarama image --ar 9:16 --size 2K "a neon banana poster"` |
-
-Each finished image arrives as a notification with the picture in it. Tap it to open, or use **Share**, **Edit** or **New**.
 Add `16:9`, `2K`, `4K`, `pro` or `lite` to any description (`a lighthouse at dusk, 21:9, pro`) to override the defaults
-for that image.
+for that image. Each finished image arrives as a notification with the picture and **Share**, **Edit** and **New** buttons.
 
-> The Claude Android app can't call tools on your phone, so in the app use **Share → Termux** on the text you want drawn.
-> Claude Code running inside Termux gets the full `/image` command.
-
-### Commands
-
-```
-bananarama start | stop | restart | status    the background service
-bananarama new                                 ask for a description, make the image
-bananarama image [--ar 16:9] [--size 2K] [--model pro] [--image ref.jpg] <text>
-bananarama test                                the test image
-bananarama menu                                everything, as a list
-bananarama settings                            API key, model, ratio, size, folder, notifications
-bananarama last                                open the last image
-bananarama doctor                              health check (✅ / ❌)
-bananarama log                                 service and middleware logs
-bananarama setup | uninstall                   boot script, widgets, share handlers, Claude Code skills
-```
-
-## Galaxy S25: keep it running
-
-One UI is aggressive about background apps. After installing:
-
-1. **Settings → Battery → Background usage limits → Never sleeping apps → +** → add **Termux** (and Termux:API, Termux:Boot).
-2. **Settings → Apps → Termux → Battery → Unrestricted.**
-3. Allow **notifications** for Termux and Termux:API (Android asks the first time).
-4. Open **Termux:Boot** once so Android lets it run at boot.
-5. Optional, for heavy use: Android 14+ can kill background child processes ("phantom process" limit). In
-   **Developer options**, turn on **Disable child process restrictions**.
-
-The service holds a Termux wake lock (setting `wakeLock`), and the notification shows *Ready* while it's healthy. If the
-middleware crashes, the service restarts it.
+> The Claude app can't call tools on your phone directly, so Bananarama plugs into Android instead: the
+> text-selection menu and the share sheet work in Claude and in every other app.
 
 ## Settings
 
-`bananarama settings`, or edit `~/.config/Bananarama/settings.json`:
+In the app (⚙): API key (masked, re-checked when you change it), default model (Flash, Pro, Lite, Original), aspect
+ratio, size, the folder inside Pictures, notifications, confirming shared text, and the Claude Code link (port
+7861 on 127.0.0.1 only).
 
-| key | default | notes |
-|---|---|---|
-| `apiKey` | `""` | Gemini API key; falls back to `GEMINI_API_KEY` |
-| `model` | `gemini-3.1-flash-image` | Nano Banana 2. Also `gemini-3-pro-image`, `gemini-3.1-flash-lite-image`, `gemini-2.5-flash-image` |
-| `aspectRatio` | `1:1` | `1:1 2:3 3:2 3:4 4:3 4:5 5:4 9:16 16:9 21:9` |
-| `imageSize` | `1K` | `1K`, `2K`, `4K` |
-| `outputDir` / `outputSubfolder` | `""` / `Nano` | empty = the phone's shared Pictures folder |
-| `notify` | `true` | notification with the finished picture (off = a toast) |
-| `openAfterSave` | `false` | open each image in the Gallery |
-| `wakeLock` | `true` | keep running with the screen off |
-| `host` / `port` | `127.0.0.1` / `7861` | the middleware; local only |
+## Claude Code in Termux (optional)
+
+For Claude Code running in [Termux](https://f-droid.org/packages/com.termux/) on the phone:
+
+1. In Bananarama: **Settings → Claude Code link → on**. It speaks the same local API as the Windows middleware.
+2. In Termux:
+   ```sh
+   curl -fsSL https://raw.githubusercontent.com/GunGreenEyes/Bananarama-Android/main/install.sh | bash
+   ```
+   This adds the `bananarama` command and the `/image` and `/bananarama` skills. It uses the app's link when it's
+   on; otherwise it can run its own middleware in Termux ([details](docs/termux.md)).
+
+On Galaxy phones, let the link run in the background: Bananarama → Settings → *Let it run in the background*.
 
 ## How it works
 
 ```
- notification / widget / share sheet ─► bananarama (src/android/main.js) ─┐
- Claude Code in Termux ── /image ─────► bananarama image ────────────────┼─► src/lib/client.js ─HTTP─► src/server.js ─► Gemini API
-                                                                         │                            (127.0.0.1:7861)
- Termux:Boot ─► bananarama start ─► service (src/android/service.js) ────┘ keeps server.js alive, wake lock, notification
-                                                                             └─► Pictures/Nano/image_<time>_<slug>.png → Gallery
+ Claude app ── select text / share ──► MainActivity (WebView, JavaScript UI) ─┐
+ Quick Settings tile / shortcut ─────► MainActivity ───────────────────────────┼─► GenerateService (foreground) ─► Gemini API
+ Notification "Edit" / "New" ────────► MainActivity ───────────────────────────┘          │ streamGenerateContent (SSE)
+                                                                                           └─► Pictures/Nano → Gallery + notification
+ Claude Code in Termux ── HTTP 127.0.0.1:7861 ──► ApiService (/health, /imagine NDJSON, same as Windows)
 ```
 
 | piece | what it does |
 |---|---|
-| `src/server.js`, `src/lib/` | The middleware and client, shared with Bananarama for Windows. Streams from `streamGenerateContent`; local, non-browser requests only. |
-| `src/android/service.js` | The stand-in for the Windows tray app: supervises the middleware, wake lock, persistent notification. |
-| `src/android/actions.js` | New image, share and edit handling, notifications with the picture, Settings dialogs, health check. |
-| `src/android/termux.js` | Wrapper over Termux:API (`termux-notification`, `termux-dialog`, …), with timeouts. |
-| `src/android/install.js` | Boot script, widgets, `termux-url-opener` / `termux-file-editor`, Claude Code skills. Never overwrites files it didn't write. |
-| `install.sh` | The one-line installer and updater. |
+| `android/app/src/main/assets/www/` | The app's screens in **JavaScript**: setup wizard, prompt, edit, settings. |
+| `android/app/…/MainActivity.kt` | Hosts the page and handles intents (text selection, share, tile, shortcut, notification actions). |
+| `android/app/…/Services.kt` | `GenerateService` keeps going after you switch back to Claude. `ApiService` is the Claude Code link. |
+| `android/core/` | Plain Kotlin: Gemini streaming client, the `16:9, 2K, pro` parsing, file naming, and the local API. No Android dependencies, so it's unit-tested on any JVM. |
+| `src/`, `bin/`, `install.sh` | The Termux command line (Node.js), for Claude Code in Termux. |
 
 ## Development
 
 ```sh
-npm test     # 55 tests: middleware against a fake Gemini, plus the Android layer with a fake Termux
+npm test                                          # 60 Node tests (Termux tools, app UI helpers, middleware)
+cd android && ./gradlew :core:test                # Kotlin core (no Android SDK needed: BANANARAMA_CORE_ONLY=1)
+cd android && ./gradlew :app:assembleDebug        # the APK (needs the Android SDK)
+cd android && ./gradlew :app:connectedDebugAndroidTest   # on an emulator or phone
 ```
 
-No npm dependencies. CI runs the tests on Linux with Node 22, 24 and 26.
+CI ([android.yml](.github/workflows/android.yml)) builds the APK, runs the unit tests, and runs the app on an
+Android 14 emulator against a fake Gemini. The UI can be previewed in a desktop browser by opening
+`android/app/src/main/assets/www/index.html`; it falls back to a fake phone bridge (add `?ready` to skip setup).
 
-Versions are whole numbers: **v1, v2, v3, …** `npm run release` bumps `package.json`, tags `vN` and pushes. The tag
-publishes a GitHub release, and phones pick it up the next time they run the installer.
+### Releases
+
+Versions are whole numbers: **v2, v3, …** `npm run release` bumps `package.json`, tags `vN` and pushes. The
+[release workflow](.github/workflows/release.yml) builds `Bananarama.apk`, signed with the `ANDROID_SIGNING_KEY`
+repository secret (base64 of the release keystore), and publishes it. Keep the keystore safe: Android only installs
+updates signed with the same key.
 
 ## License
 

@@ -4,7 +4,7 @@ plugins {
 }
 
 // Whole-number versions come from ../package.json: "2.0.0" -> versionCode 2, versionName "v2".
-val major: Int = Regex("\"version\"\s*:\s*\"(\d+)")
+val major: Int = Regex("\"version\"\\s*:\\s*\"(\\d+)")
     .find(rootProject.file("../package.json").readText())!!.groupValues[1].toInt()
 
 android {
