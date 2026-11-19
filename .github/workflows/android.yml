@@ -58,19 +58,31 @@ jobs:
       - name: Emulator test summary
         if: always()
         working-directory: android
+        shell: bash
         run: |
-          files=$(find app/build/outputs/androidTest-results -name 'TEST-*.xml' 2>/dev/null)
-          [ -n "$files" ] || { echo "::error::no emulator test results found"; exit 1; }
-          tests=0; failures=0; errors=0
-          for f in $files; do
-            t=$(grep -o 'tests="[0-9]*"' "$f" | head -1 | grep -o '[0-9]*'); tests=$((tests + t))
-            x=$(grep -o 'failures="[0-9]*"' "$f" | head -1 | grep -o '[0-9]*'); failures=$((failures + x))
-            e=$(grep -o 'errors="[0-9]*"' "$f" | head -1 | grep -o '[0-9]*'); errors=$((errors + e))
-          done
-          names=$(grep -ho 'testcase name="[^"]*"' $files | sed 's/testcase name="//; s/"$//' | sort | paste -sd, -)
-          echo "::notice title=Emulator tests::$tests tests, $failures failures, $errors errors: $names"
-          echo "### Emulator: $tests tests, $failures failures, $errors errors" >> "$GITHUB_STEP_SUMMARY"
-          [ "$tests" -gt 0 ] && [ "$failures" -eq 0 ] && [ "$errors" -eq 0 ]
+          files=$(find app/build/outputs/androidTest-results -name 'TEST-*.xml' 2>/dev/null || true)
+          [ -n "$files" ] || { echo "::error title=Emulator tests::no emulator test results found"; exit 1; }
+          # one annotation per test, with the first lines of any failure (readable without signing in)
+          node - $files <<'EOF'
+          const fs = require('fs');
+          let total = 0, bad = 0;
+          for (const f of process.argv.slice(2)) {
+            const x = fs.readFileSync(f, 'utf8');
+            for (const m of x.matchAll(/<testcase name="([^"]*)"[^>]*?(\/>|>([\s\S]*?)<\/testcase>)/g)) {
+              total++;
+              const fail = /<(failure|error)[^>]*>([\s\S]*?)<\/\1>/.exec(m[3] || '');
+              if (fail) {
+                bad++;
+                const text = fail[2].replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&')
+                  .split('\n').slice(0, 6).join(' | ').slice(0, 900);
+                console.log(`::error title=${m[1]}::${text}`);
+              } else console.log(`::notice title=passed::${m[1]}`);
+            }
+          }
+          console.log(`::notice title=Emulator tests::${total} tests, ${bad} failed`);
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `### Emulator: ${total} tests, ${bad} failed\n`);
+          process.exit(total > 0 && bad === 0 ? 0 : 1);
+          EOF
       - uses: actions/upload-artifact@v4
         if: always()
         with:
