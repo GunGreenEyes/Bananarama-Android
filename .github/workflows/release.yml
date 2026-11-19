@@ -1,5 +1,6 @@
 name: release
-# Push a whole-number tag (v2, v3, ...) - usually via `npm run release` - to build and publish the installer.
+# Push a whole-number tag (v1, v2, ...) - usually via `npm run release`. install.sh on
+# the phone installs the latest release, so publishing one is how phones get updates.
 on:
   push:
     tags: ['v*']
@@ -7,30 +8,30 @@ permissions:
   contents: write
 jobs:
   release:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
         with:
-          node-version: 26
+          node-version: 24
       - name: Check tag matches package.json
-        shell: pwsh
         run: |
-          $tag = '${{ github.ref_name }}'
-          if ($tag -notmatch '^v\d+$') { throw "tags must be whole numbers like v2, got $tag" }
-          $major = (Get-Content package.json -Raw | ConvertFrom-Json).version.Split('.')[0]
-          if ($tag -ne "v$major") { throw "tag $tag does not match package.json version $major" }
+          tag='${{ github.ref_name }}'
+          [[ "$tag" =~ ^v[0-9]+$ ]] || { echo "tags must be whole numbers like v2, got $tag"; exit 1; }
+          major=$(node -p "require('./package.json').version.split('.')[0]")
+          [ "$tag" = "v$major" ] || { echo "tag $tag does not match package.json version $major"; exit 1; }
       - run: npm test
-      - name: Install Inno Setup
-        shell: pwsh
-        run: if (-not (Test-Path "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe")) { choco install innosetup -y --no-progress }
-      - name: Build installer
-        shell: pwsh
-        run: ./scripts/build.ps1 -Test
       - name: Publish release
-        shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          $tag = '${{ github.ref_name }}'
-          gh release create $tag "dist/Bananarama-Setup-$tag.exe" --title "Bananarama $tag" --generate-notes --latest
+          tag='${{ github.ref_name }}'
+          git archive --format=tar.gz --prefix=bananarama/ -o "bananarama-android-$tag.tar.gz" "$tag"
+          cat > notes.md <<EOF
+          Install or update on your phone, in Termux:
+
+          \`\`\`
+          curl -fsSL https://raw.githubusercontent.com/${{ github.repository }}/main/install.sh | bash
+          \`\`\`
+          EOF
+          gh release create "$tag" "bananarama-android-$tag.tar.gz" --title "Bananarama for Android $tag" --notes-file notes.md --generate-notes --latest

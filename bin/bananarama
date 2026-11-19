@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+# Bananarama for Android (Termux). See src/android/main.js for the commands.
+here=$(dirname "$(readlink -f "$0")")
+exec node "$here/../src/android/main.js" "$@"

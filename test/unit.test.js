@@ -6,8 +6,8 @@ const os = require('os');
 const path = require('path');
 
 const settingsLib = require('../src/lib/settings');
-const { resolveDownloads } = require('../src/lib/downloads');
-const { outPath, outputDir, resolveModel, isPng, loadImages } = require('../src/lib/client');
+const { resolvePictures, hasSharedStorage, candidates } = require('../src/lib/pictures');
+const { outPath, outputDir, resolveModel, isPng, loadImages, extensionFor } = require('../src/lib/client');
 const { parseArgs } = require('../src/cli');
 const { sseEvents } = require('../src/server');
 const { PNG_B64 } = require('./helpers');
@@ -57,12 +57,25 @@ test('settings: invalid JSON gives a clear error', () => {
   finally { delete process.env.BANANARAMA_SETTINGS; fs.rmSync(dir, { recursive: true, force: true }); }
 });
 
-test('downloads: resolves an existing folder', () => {
-  const d = resolveDownloads();
-  assert.ok(d && fs.existsSync(d), `got ${d}`);
+test('pictures: Termux storage link first, then shared storage, then ~/Pictures', () => {
+  const home = '/data/data/com.termux/files/home';
+  const has = set => p => set.includes(p);
+  assert.equal(resolvePictures(home, has([`${home}/storage/pictures`, '/sdcard/Pictures'].map(p => path.normalize(p)))), path.join(home, 'storage', 'pictures'));
+  assert.equal(resolvePictures(home, has(['/storage/emulated/0/Pictures'])), '/storage/emulated/0/Pictures');
+  assert.equal(resolvePictures(home, () => false), path.join(home, 'Pictures'), 'falls back when nothing exists');
+  assert.equal(hasSharedStorage(home, () => false), false);
+  assert.equal(hasSharedStorage(home, has(['/sdcard/Pictures'])), true);
+  assert.equal(candidates(home).length, 4);
 });
 
-test('outputDir: Downloads + Nano subfolder, explicit override wins', () => {
+test('extensionFor: keeps the format the model sent', () => {
+  assert.equal(extensionFor(Buffer.from(PNG_B64, 'base64'), 'image/jpeg'), '.png', 'PNG signature wins');
+  assert.equal(extensionFor(Buffer.from([0xff, 0xd8, 0xff, 0xe0]), 'image/png'), '.jpg', 'JPEG signature wins');
+  assert.equal(extensionFor(Buffer.from('RIFFxxxxWEBP'), 'image/webp'), '.webp');
+  assert.equal(extensionFor(Buffer.from('????'), 'application/x-unknown'), '.png');
+});
+
+test('outputDir: Pictures + Nano subfolder, explicit override wins', () => {
   assert.equal(outputDir({ outputDir: 'X:\\dl', outputSubfolder: 'Nano' }), path.join('X:\\dl', 'Nano'));
   assert.equal(outputDir({ outputDir: 'X:\\dl', outputSubfolder: '' }), 'X:\\dl');
   assert.equal(outputDir({ outputDir: 'X:\\dl', outputSubfolder: 'Nano' }, 'Y:\\o'), 'Y:\\o');
@@ -79,6 +92,7 @@ test('outPath: timestamp + slug, collisions get a suffix', () => {
     assert.equal(path.basename(outPath(dir, 'image', 'A Cat, in SPACE!!', now)), 'image_20261118-090507_a-cat-in-space_2.png');
     assert.match(path.basename(outPath(dir, 'p', '!!!', now)), /_image\.png$/);
     assert.ok(path.basename(outPath(dir, 'p', 'x'.repeat(200), now)).length < 80);
+    assert.equal(path.basename(outPath(dir, 'image', 'jpeg one', now, '.jpg')), 'image_20261118-090507_jpeg-one.jpg');
   } finally { fs.rmSync(dir, { recursive: true, force: true }); }
 });
 

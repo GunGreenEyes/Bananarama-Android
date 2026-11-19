@@ -5,17 +5,17 @@ on:
   pull_request:
 jobs:
   test:
-    runs-on: windows-latest
+    # Termux is Linux userland on Android; Ubuntu is the closest runner.
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        node: [22, 26]
+        node: [22, 24, 26]
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
         with:
           node-version: ${{ matrix.node }}
       - run: npm test
-      - name: Tray tests
-        shell: pwsh
-        run: ./tray/build.ps1 -Test
+      - name: Shell scripts parse
+        run: bash -n install.sh && sh -n bin/bananarama

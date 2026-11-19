@@ -6,7 +6,7 @@
 //   npm run release -- --dry   show what would happen
 //
 // Sets package.json to "<N>.0.0", commits "Release vN", tags vN and pushes. The tag triggers
-// .github/workflows/release.yml, which builds Bananarama-Setup-vN.exe and publishes the GitHub release.
+// .github/workflows/release.yml, which publishes the GitHub release that phones install.
 const fs = require('fs');
 const path = require('path');
 const { execFileSync } = require('child_process');
@@ -33,7 +33,7 @@ function main() {
   try { git('fetch', '--tags', '--quiet'); } catch { /* offline: use local tags */ }
   const n = nextVersion(current, git('tag', '--list', 'v*').split('\n'));
   const tag = `v${n}`;
-  console.log(`releasing Bananarama ${tag}${dry ? ' (dry run)' : ''}`);
+  console.log(`releasing Bananarama for Android ${tag}${dry ? ' (dry run)' : ''}`);
   if (dry) return;
   if (n !== current) {
     pkg.version = `${n}.0.0`;
@@ -43,7 +43,7 @@ function main() {
   git('tag', '-a', tag, '-m', `Bananarama ${tag}`);
   git('push', 'origin', 'HEAD');
   git('push', 'origin', tag);
-  console.log(`pushed ${tag}; GitHub Actions is building the installer: https://github.com/GunGreenEyes/Bananarama/actions`);
+  console.log(`pushed ${tag}; GitHub Actions is publishing the release: https://github.com/GunGreenEyes/Bananarama-Android/actions`);
 }
 
 if (require.main === module) {

@@ -74,7 +74,7 @@ test('install/uninstall skills: writes rendered skills, skips foreign ones, remo
   let r = setup.installSkills(dir, setup.vars('C:\\node.exe'));
   assert.deepEqual(r, { done: ['bananarama'], skipped: ['image'] });
   const text = fs.readFileSync(path.join(dir, 'bananarama', 'SKILL.md'), 'utf8');
-  assert.match(text, /"C:\\node\.exe" ".+cli\.js" --where/);
+  assert.match(text, /".+bananarama" doctor/);
   assert.doesNotMatch(text, /\{\{\w+\}\}/);
 
   fs.writeFileSync(path.join(dir, 'image', 'SKILL.md'), 'old copy: node F:\\x\\BananaInterop\\image.js');

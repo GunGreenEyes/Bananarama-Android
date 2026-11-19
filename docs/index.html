@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Bananarama</title>
+<title>Bananarama for Android</title>
 <link rel="icon" href="banana.png">
-<meta name="description" content="Bananarama: type /image in Claude, get a Gemini Nano Banana PNG in Downloads\Nano. A Windows tray app with a one-click installer.">
+<meta name="description" content="Bananarama for Android: Gemini Nano Banana images from a notification, the share sheet, widgets or /image in Claude Code. Runs in the background in Termux on your Galaxy.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -103,91 +103,89 @@
   .menu .chk::before { content: "\2713"; margin-right: 8px; color: var(--green); }
   .shot { width: 100%; max-width: 525px; height: auto; display: block; border-radius: 10px; box-shadow: var(--shadow); border: 1px solid var(--line); }
   @media (max-width: 860px) { .split { grid-template-columns: 1fr; } }
+  .tag { font: 600 11px/1 Inter, sans-serif; background: var(--green); color: #fff; padding: 4px 7px; border-radius: 6px; letter-spacing: .02em; }
+  .phone { justify-self: center; width: 100%; max-width: 360px; background: #0f0f12; border-radius: 34px; padding: 14px; box-shadow: var(--shadow); border: 1px solid var(--line); }
+  .shade { background: #1d1d22; border-radius: 24px; padding: 12px; display: grid; gap: 10px; }
+  .note { background: #2a2a31; color: #f1f1f4; border-radius: 18px; padding: 12px 14px; font-size: 13.5px; }
+  .note-head { display: flex; gap: 6px; align-items: center; color: #b9b9c4; font-size: 11.5px; margin-bottom: 6px; }
+  .note-title { font-weight: 600; font-size: 14.5px; }
+  .note-text { color: #c9c9d3; margin-top: 2px; overflow-wrap: anywhere; }
+  .note-img { display: block; width: 100%; height: auto; border-radius: 12px; margin-top: 10px; aspect-ratio: 1376 / 768; object-fit: cover; }
+  .hero .note-head img { width: 16px; height: 16px; aspect-ratio: auto; border-radius: 4px; box-shadow: none; display: inline-block; }
+  .hero .note-img { box-shadow: none; }
+  .note-btns { display: flex; gap: 18px; margin-top: 10px; color: #8ab4ff; font-weight: 600; font-size: 13px; }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="top">
-    <div class="brand"><img src="banana.png" alt="" width="26" height="26">Bananarama</div>
+    <div class="brand"><img src="banana.png" alt="" width="26" height="26">Bananarama <span class="tag">Android</span></div>
     <nav>
       <a href="#how">How it works</a>
-      <a href="#tray">Tray</a>
+      <a href="#use">Use it</a>
       <a href="#install">Install</a>
-      <a href="#settings">Settings</a>
-      <a class="gh" href="https://github.com/GunGreenEyes/Bananarama">GitHub ↗</a>
+      <a href="#galaxy">Galaxy tips</a>
+      <a class="gh" href="https://github.com/GunGreenEyes/Bananarama-Android">GitHub ↗</a>
     </nav>
   </header>
 
   <div class="hero">
     <div>
-      <span class="pill">Claude × Gemini Nano Banana</span>
-      <h1>Type <mark>/image</mark>.<br>Get a PNG.</h1>
-      <p class="lede">Bananarama sits in your Windows tray and lets Claude Chat, Cowork and Claude Code make images with Google's Nano Banana models, saved straight into <code>Downloads\Nano</code>.</p>
+      <span class="pill">Nano Banana × your phone</span>
+      <h1>Share it.<br>Get a <mark>picture</mark>.</h1>
+      <p class="lede">Bananarama for Android runs quietly in the background on your Galaxy. Make Gemini Nano Banana images from a notification, the share sheet, a home-screen widget, or <code>/image</code> in Claude Code. They land in your Gallery.</p>
       <div class="actions">
-        <a class="btn" href="https://github.com/GunGreenEyes/Bananarama/releases/latest">Download for Windows <small>latest release</small></a>
-        <span class="meta">Windows 10/11 · free · MIT</span>
+        <a class="btn" href="#install">Install in Termux</a>
+        <span class="meta">Android 8+ · Galaxy S25 ready · free · MIT</span>
       </div>
-      <div class="cmd" aria-label="example command"><b>/image</b><span>a neon green banana spaceship docking at a station, 16:9</span></div>
+      <div class="cmd" aria-label="install command"><b>$</b><span>curl -fsSL https://raw.githubusercontent.com/GunGreenEyes/Bananarama-Android/main/install.sh | bash</span></div>
     </div>
-    <figure>
-      <img src="hero.jpg" alt="A glowing neon-green banana-shaped spaceship docking at a ring-shaped space station above Earth" width="1376" height="768">
-      <figcaption>Downloads\Nano\image_…_a-neon-green-banana-shaped-spaceship.png</figcaption>
-    </figure>
+    <div class="phone" role="img" aria-label="Android notification shade with the Bananarama notification and a finished image">
+      <div class="shade">
+        <div class="note">
+          <div class="note-head"><img src="banana.png" alt="" width="16" height="16"> Termux · Bananarama</div>
+          <div class="note-title">Bananarama</div>
+          <div class="note-text">Ready · 127.0.0.1:7861</div>
+          <div class="note-btns"><span>New image</span><span>Settings</span><span>Stop</span></div>
+        </div>
+        <div class="note">
+          <div class="note-head"><img src="banana.png" alt="" width="16" height="16"> Termux · now</div>
+          <div class="note-title">Image saved</div>
+          <div class="note-text">image_…_a-neon-green-banana-spaceship.png</div>
+          <img class="note-img" src="hero.jpg" alt="" width="1376" height="768">
+          <div class="note-btns"><span>Share</span><span>Edit</span><span>New</span></div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <section id="how">
     <h2>How it works</h2>
-    <p class="sub">Claude never talks to Google directly. It talks to Bananarama on your PC, which holds your key.</p>
+    <p class="sub">The same JavaScript middleware as Bananarama for Windows, kept alive on your phone by Termux.</p>
     <div class="flow">
-      <div class="step"><h3>You ask</h3><p><code>/image</code> in Claude Code, or the <code>image</code> tool in Chat and Cowork.</p></div>
-      <div class="step"><h3>Middleware</h3><p>The tray app keeps a small local server on <code>127.0.0.1:7861</code> that forwards the prompt to Gemini.</p></div>
-      <div class="step"><h3>Stream back</h3><p>The image streams back in chunks, is reassembled and converted to PNG if needed.</p></div>
-      <div class="step"><h3>Saved</h3><p>Written to your <em>real</em> Downloads folder, even if you moved it, in <code>Nano\</code>.</p></div>
+      <div class="step"><h3>You ask</h3><p>Tap <b>New image</b>, share text to Termux, tap a widget, or type <code>/image</code> in Claude Code.</p></div>
+      <div class="step"><h3>Middleware</h3><p>A background service keeps <code>server.js</code> running on <code>127.0.0.1:7861</code> with a wake lock, and restarts it if it crashes.</p></div>
+      <div class="step"><h3>Stream back</h3><p>Gemini streams the image back in chunks, and they're put back together on the phone.</p></div>
+      <div class="step"><h3>Gallery</h3><p>Saved to <code>Pictures/Nano</code>, scanned into the Gallery, and shown in a notification.</p></div>
     </div>
   </section>
 
-  <section id="tray">
-    <h2>Lives in your tray</h2>
-    <p class="sub">Starts with Windows, keeps the middleware running, and restarts it if it ever falls over.</p>
-    <div class="split">
-      <div>
-        <div class="menu" role="img" aria-label="Bananarama tray menu">
-          <div class="dim">Bananarama v2</div>
-          <div class="dim">Running on 127.0.0.1:7861</div>
-          <div class="sep"></div>
-          <div>New image…</div>
-          <div>Make a test image</div>
-          <div>Open images folder</div>
-          <div class="sep"></div>
-          <div class="bold">Settings…</div>
-          <div class="chk">Start with Windows</div>
-          <div>Connect to Claude</div>
-          <div class="sep"></div>
-          <div>Restart middleware</div>
-          <div>Open log</div>
-          <div>Website</div>
-          <div class="sep"></div>
-          <div>Quit</div>
-        </div>
-        <p class="meta" style="margin-top:14px">Right-click the banana. Double-click opens Settings. The banana turns grey while the middleware is starting or stopped.</p>
-      </div>
-      <img class="shot" src="settings.png" alt="The Bananarama Settings window: Gemini API key with a Test key button, model, aspect ratio, image size, save folder, subfolder, file name prefix, open after saving, start with Windows, and port" width="525" height="481" loading="lazy">
-    </div>
-  </section>
-
-  <section>
-    <h2>Works where you do</h2>
-    <p class="sub">One middleware, four front doors.</p>
+  <section id="use">
+    <h2>Five ways in</h2>
+    <p class="sub">Add <code>16:9</code>, <code>2K</code>, <code>4K</code>, <code>pro</code> or <code>lite</code> to any description.</p>
     <div class="grid3">
-      <div class="card"><h3>Claude Code</h3><p>The installer adds <code>/image</code> and <code>/bananarama</code> (a self-check) to the CLI and the desktop Code tab.</p><pre><code>/image a fox in a library, 2K</code></pre></div>
-      <div class="card"><h3>Chat &amp; Cowork</h3><p>An MCP server exposes an <code>image</code> tool. Ask for a picture and it shows up inline.</p><pre><code>"draw me a banana balloon"</code></pre></div>
-      <div class="card"><h3>Tray &amp; command line</h3><p><b>New image…</b> from the tray, or script it from a terminal.</p><pre><code>node cli.js --ar 9:16 "poster"</code></pre></div>
+      <div class="card"><h3>Notification</h3><p>Always in the shade while it runs: <b>New image</b>, <b>Settings</b>, <b>Stop</b>. Tap it for the full menu.</p><pre><code>Bananarama · Ready</code></pre></div>
+      <div class="card"><h3>Share sheet</h3><p>Select text in any app, including the Claude app, and <b>Share → Termux</b>. Share a photo instead to edit it.</p><pre><code>"a fox in a library, 16:9"</code></pre></div>
+      <div class="card"><h3>Claude Code</h3><p>Claude Code in Termux gets <code>/image</code> and a <code>/bananarama</code> self-check.</p><pre><code>/image a lighthouse at dusk, pro</code></pre></div>
+      <div class="card"><h3>Widgets</h3><p>Termux:Widget puts <b>New image</b>, <b>Test image</b>, <b>Menu</b> and <b>Settings</b> on your home screen.</p><pre><code>Bananarama - New image</code></pre></div>
+      <div class="card"><h3>Terminal</h3><p>Script it, with the same flags as the Windows CLI.</p><pre><code>bananarama image --ar 9:16 "poster"</code></pre></div>
+      <div class="card"><h3>Health check</h3><p>Checks storage, Termux:API, the key, the service and start-at-boot.</p><pre><code>bananarama doctor</code></pre></div>
     </div>
   </section>
 
   <section>
     <h2>Made with it</h2>
-    <p class="sub">Straight out of <code>Downloads\Nano</code>, first try.</p>
+    <p class="sub">Straight out of <code>Pictures/Nano</code>.</p>
     <div class="gallery">
       <img src="sunglasses.jpg" alt="A ripe banana wearing round sunglasses on a striped beach towel" loading="lazy" width="900" height="900">
       <img src="astronaut.jpg" alt="A tiny banana astronaut planting a flag on the moon" loading="lazy" width="900" height="900">
@@ -197,35 +195,33 @@
 
   <section id="install">
     <h2>Install</h2>
-    <p class="sub">One installer. No admin rights and no Node.js to install; everything it needs is inside.</p>
+    <p class="sub">Four free apps from F-Droid, then one command. The Play Store Termux is outdated, so don't use it.</p>
     <ol class="install">
-      <li><p>Download <code>Bananarama-Setup-v&lt;N&gt;.exe</code> from the <a href="https://github.com/GunGreenEyes/Bananarama/releases/latest">latest release</a> and run it. Keep <b>Start with Windows</b> and <b>Connect to Claude</b> ticked.</p></li>
-      <li><p>Paste a Gemini API key from <a href="https://aistudio.google.com/apikey">AI Studio</a> into the Settings window that opens, and press <b>Test key</b>. Image models need billing on the key's Google Cloud project.</p></li>
-      <li><p>Fully quit Claude Desktop (tray → Quit) and reopen it. Then type <code>/image</code> and a description in Chat, Cowork or Claude Code.</p></li>
+      <li><p>Install <a href="https://f-droid.org/packages/com.termux/">Termux</a>, <a href="https://f-droid.org/packages/com.termux.api/">Termux:API</a>, <a href="https://f-droid.org/packages/com.termux.boot/">Termux:Boot</a> and, optionally, <a href="https://f-droid.org/packages/com.termux.widget/">Termux:Widget</a>. Open Termux:Boot once.</p></li>
+      <li><p>Open Termux and paste:</p><pre><code>curl -fsSL https://raw.githubusercontent.com/GunGreenEyes/Bananarama-Android/main/install.sh | bash</code></pre></li>
+      <li><p>Allow storage access, then paste a Gemini API key from <a href="https://aistudio.google.com/apikey">AI Studio</a> when asked. Image models need billing on the key's Google Cloud project.</p></li>
     </ol>
-    <p class="meta" style="margin-top:22px">Updating: run the newer installer over the old one. Uninstalling (Settings → Apps) removes Bananarama from Claude and from startup, and keeps your settings and images.</p>
+    <p class="meta" style="margin-top:22px">To update, run the same command again. To remove it, run <code>bananarama uninstall</code>; your settings and images are kept.</p>
   </section>
 
-  <section id="settings">
-    <h2>Settings</h2>
-    <p class="sub">Tray → Settings, or edit <code>%APPDATA%\Bananarama\settings.json</code>. Changes apply to the next image.</p>
+  <section id="galaxy">
+    <h2>Galaxy S25: keep it running</h2>
+    <p class="sub">One UI puts background apps to sleep. Do these once.</p>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Key</th><th>Default</th><th>Notes</th></tr></thead>
+        <thead><tr><th>Where</th><th>Set</th></tr></thead>
         <tbody>
-          <tr><td><code>model</code></td><td><code>gemini-3.1-flash-image</code></td><td>Nano Banana 2. <code>gemini-3-pro-image</code> for best quality and text.</td></tr>
-          <tr><td><code>aspectRatio</code></td><td><code>1:1</code></td><td>1:1, 2:3, 3:2, 3:4, 4:3, 4:5, 5:4, 9:16, 16:9, 21:9</td></tr>
-          <tr><td><code>imageSize</code></td><td><code>1K</code></td><td>1K, 2K or 4K</td></tr>
-          <tr><td><code>outputDir</code></td><td><em>Downloads</em></td><td>Empty means your real Downloads folder.</td></tr>
-          <tr><td><code>outputSubfolder</code></td><td><code>Nano</code></td><td>Empty saves directly into <code>outputDir</code>.</td></tr>
-          <tr><td><code>port</code></td><td><code>7861</code></td><td>Local only (127.0.0.1); web pages can't call it.</td></tr>
+          <tr><td>Settings → Battery → Background usage limits</td><td>Add Termux, Termux:API and Termux:Boot to <b>Never sleeping apps</b></td></tr>
+          <tr><td>Settings → Apps → Termux → Battery</td><td><b>Unrestricted</b></td></tr>
+          <tr><td>Notifications</td><td>Allow them for Termux and Termux:API</td></tr>
+          <tr><td>Developer options (optional)</td><td><b>Disable child process restrictions</b>, so Android 14+ doesn't kill the middleware</td></tr>
         </tbody>
       </table>
     </div>
   </section>
 
   <footer>
-    Bananarama · MIT · <a href="https://github.com/GunGreenEyes/Bananarama">github.com/GunGreenEyes/Bananarama</a> · Not affiliated with Google or Anthropic.
+    Bananarama for Android · MIT · <a href="https://github.com/GunGreenEyes/Bananarama-Android">github.com/GunGreenEyes/Bananarama-Android</a> · On Windows? <a href="https://gungreeneyes.github.io/Bananarama/">Bananarama for Windows</a> · Not affiliated with Google, Samsung or Anthropic.
   </footer>
 </div>
 </body>

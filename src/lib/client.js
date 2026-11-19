@@ -1,14 +1,15 @@
 'use strict';
-// Shared client core: talk to the middleware, reassemble the streamed image,
-// make sure it is a PNG, save it to <Downloads>\Nano. Never writes to stdout
-// (the MCP server uses stdout for protocol traffic) - progress goes to onProgress.
+// Shared client core: talk to the middleware, reassemble the streamed image and
+// save it to <Pictures>/Nano. Never writes to stdout (the MCP server uses stdout
+// for protocol traffic) - progress goes to onProgress.
 const fs = require('fs');
-const os = require('os');
 const path = require('path');
 const http = require('http');
-const { spawn, execFileSync } = require('child_process');
+const { spawn } = require('child_process');
 const settingsLib = require('./settings');
-const { resolveDownloads } = require('./downloads');
+const { resolvePictures } = require('./pictures');
+
+const EXT = { 'image/png': '.png', 'image/jpeg': '.jpg', 'image/webp': '.webp', 'image/gif': '.gif', 'image/heic': '.heic' };
 
 const MIME = { '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.gif': 'image/gif', '.heic': 'image/heic' };
 const PNG_SIG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
@@ -53,33 +54,25 @@ async function ensureServer(s) {
 
 function isPng(buf) { return buf.length >= 8 && buf.subarray(0, 8).equals(PNG_SIG); }
 
-function toPng(buf, mimeType) {
-  if (isPng(buf)) return buf;
-  if (process.platform !== 'win32') throw new Error(`model returned ${mimeType}; PNG conversion needs Windows`);
-  const tmp = path.join(os.tmpdir(), `bi_${process.pid}_${Date.now()}`);
-  fs.writeFileSync(tmp + '.src', buf);
-  try {
-    execFileSync('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command',
-      `Add-Type -AssemblyName System.Drawing; $i=[System.Drawing.Image]::FromFile('${tmp}.src'); $i.Save('${tmp}.png',[System.Drawing.Imaging.ImageFormat]::Png); $i.Dispose()`],
-      { windowsHide: true, timeout: 60000, stdio: 'ignore' });
-    return fs.readFileSync(tmp + '.png');
-  } finally {
-    fs.rmSync(tmp + '.src', { force: true }); fs.rmSync(tmp + '.png', { force: true });
-  }
+/** File extension for the bytes we got: trust the PNG signature, else the mime type. Android has no converter, so the image is kept as sent. */
+function extensionFor(buf, mimeType) {
+  if (isPng(buf)) return '.png';
+  if (buf.length >= 3 && buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff) return '.jpg';
+  return EXT[String(mimeType).toLowerCase()] || '.png';
 }
 
 function outputDir(s, override) {
   if (override) return override;
-  const base = s.outputDir || resolveDownloads();
+  const base = s.outputDir || resolvePictures();
   return s.outputSubfolder ? path.join(base, s.outputSubfolder) : base;
 }
 
-function outPath(dir, prefix, prompt, now = new Date()) {
+function outPath(dir, prefix, prompt, now = new Date(), ext = '.png') {
   const p = n => String(n).padStart(2, '0');
   const stamp = `${now.getFullYear()}${p(now.getMonth() + 1)}${p(now.getDate())}-${p(now.getHours())}${p(now.getMinutes())}${p(now.getSeconds())}`;
   const slug = prompt.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40).replace(/-$/, '') || 'image';
-  let f = path.join(dir, `${prefix}_${stamp}_${slug}.png`);
-  for (let n = 2; fs.existsSync(f); n++) f = path.join(dir, `${prefix}_${stamp}_${slug}_${n}.png`);
+  let f = path.join(dir, `${prefix}_${stamp}_${slug}${ext}`);
+  for (let n = 2; fs.existsSync(f); n++) f = path.join(dir, `${prefix}_${stamp}_${slug}_${n}${ext}`);
   return f;
 }
 
@@ -95,10 +88,10 @@ function loadImages(paths = []) {
 }
 
 /**
- * Generate an image and save it as PNG.
+ * Generate an image and save it (PNG unless the model sent another format).
  * @param {{prompt:string, model?:string, aspectRatio?:string, imageSize?:string, images?:string[], out?:string}} opts
  * @param {(ev:{type:string,message?:string,text?:string,percent?:number})=>void} [onProgress]
- * @returns {Promise<{file:string, bytes:number, texts:string[], model:string, usage:object}>}
+ * @returns {Promise<{file:string, bytes:number, mimeType:string, texts:string[], model:string, usage:object}>}
  */
 async function generate(opts, onProgress = () => {}) {
   const prompt = (opts.prompt || '').trim();
@@ -125,13 +118,15 @@ async function generate(opts, onProgress = () => {}) {
   });
   if (!chunks.length) throw new Error(error || 'no image received');
 
-  const png = toPng(Buffer.from(chunks.join(''), 'base64'), mimeType);
+  const buf = Buffer.from(chunks.join(''), 'base64');
   const dir = outputDir(s, opts.out);
   fs.mkdirSync(dir, { recursive: true });
-  const file = outPath(dir, s.filenamePrefix, prompt);
-  fs.writeFileSync(file, png);
-  if (s.openAfterSave && process.platform === 'win32') spawn('explorer.exe', [file], { detached: true, stdio: 'ignore' }).unref();
-  return { file, bytes: png.length, texts, model: done.model, usage: done.usage };
+  const file = outPath(dir, s.filenamePrefix, prompt, new Date(), extensionFor(buf, mimeType));
+  fs.writeFileSync(file, buf);
+  if (s.openAfterSave) {
+    try { spawn('termux-open', [file], { detached: true, stdio: 'ignore' }).on('error', () => {}).unref(); } catch { /* not in Termux */ }
+  }
+  return { file, bytes: buf.length, mimeType, texts, model: done.model, usage: done.usage };
 }
 
-module.exports = { generate, outputDir, outPath, toPng, isPng, resolveModel, loadImages, MODEL_ALIASES };
+module.exports = { generate, outputDir, outPath, extensionFor, isPng, resolveModel, loadImages, MODEL_ALIASES };

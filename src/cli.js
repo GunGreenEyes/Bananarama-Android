@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 // Bananarama CLI: send a description through the middleware to Gemini and
-// save the result as a PNG in <Downloads>\Nano.
+// save the result in <Pictures>/Nano (the phone's Gallery).
 //
 //   node cli.js [--model M] [--ar 16:9] [--size 2K] [--image ref.jpg]... [--out DIR] <description...>
 //

@@ -4,7 +4,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('fs');
 const path = require('path');
-const { spawn, execFileSync } = require('child_process');
+const { spawn } = require('child_process');
 const { setup, sseImage, httpError, PNG_B64 } = require('./helpers');
 const { generate } = require('../src/lib/client');
 
@@ -81,26 +81,13 @@ test('integration', async t => {
     assert.equal(ctx.gem.requests.length, n);
   });
 
-  await t.test('JPEG output is converted to PNG', { skip: process.platform !== 'win32' && 'needs Windows' }, async () => {
-    const jpg = path.join(ctx.dir, 'src.jpg');
-    execFileSync('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command',
-      `Add-Type -AssemblyName System.Drawing; $b=New-Object System.Drawing.Bitmap 4,4; $b.Save('${jpg}',[System.Drawing.Imaging.ImageFormat]::Jpeg); $b.Dispose()`]);
-    ctx.gem.behaviour = sseImage({ b64: fs.readFileSync(jpg).toString('base64'), mimeType: 'image/jpeg' });
+  await t.test('JPEG output is kept as .jpg (no converter on Android)', async () => {
+    const jpg = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00, 0xff, 0xd9]);
+    ctx.gem.behaviour = sseImage({ b64: jpg.toString('base64'), mimeType: 'image/jpeg' });
     const r = await generate({ prompt: 'jpeg' });
-    assert.deepEqual(fs.readFileSync(r.file).subarray(0, 4), Buffer.from([0x89, 0x50, 0x4e, 0x47]));
-  });
-
-  await t.test('MCP preview: big PNG becomes a small JPEG', { skip: process.platform !== 'win32' && 'needs Windows' }, () => {
-    const big = path.join(ctx.dir, 'big.png');
-    execFileSync('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command',
-      `Add-Type -AssemblyName System.Drawing; $b=New-Object System.Drawing.Bitmap 2048,1152; $g=[System.Drawing.Graphics]::FromImage($b); $g.Clear([System.Drawing.Color]::Gold); $g.Dispose(); $b.Save('${big}',[System.Drawing.Imaging.ImageFormat]::Png); $b.Dispose()`]);
-    const { preview } = require('../src/mcp');
-    const p = preview(big);
-    assert.ok(p, 'preview returned null');
-    assert.equal(p.mimeType, 'image/jpeg');
-    const buf = Buffer.from(p.data, 'base64');
-    assert.ok(buf.length > 0 && buf.length < 900 * 1024);
-    assert.deepEqual(buf.subarray(0, 3), Buffer.from([0xff, 0xd8, 0xff]));
+    assert.match(r.file, /.jpg$/);
+    assert.equal(r.mimeType, 'image/jpeg');
+    assert.deepEqual(fs.readFileSync(r.file), jpg);
   });
 
   await t.test('CLI prints SAVED path', async () => {

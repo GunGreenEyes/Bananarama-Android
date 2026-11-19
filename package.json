@@ -1,28 +1,24 @@
 {
-  "name": "bananarama",
-  "version": "2.0.0",
-  "description": "Type /image in Claude and get a Gemini Nano Banana PNG in DownloadsNano. Windows tray app + local middleware + MCP server.",
+  "name": "bananarama-android",
+  "version": "1.0.0",
+  "description": "Bananarama for Android: Gemini Nano Banana images on your phone, with a background service, notifications, the share sheet and /image in Claude Code (Termux).",
   "license": "MIT",
   "private": true,
   "bin": {
-    "bananarama": "src/cli.js"
+    "bananarama": "bin/bananarama"
   },
   "scripts": {
-    "start": "node src/server.js",
-    "mcp": "node src/mcp.js",
-    "setup": "node src/setup.js install",
-    "test": "node --test test/unit.test.js test/integration.test.js test/setup.test.js",
-    "test:tray": "powershell -NoProfile -ExecutionPolicy Bypass -File tray/build.ps1 -Test",
-    "build": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build.ps1",
+    "start": "node src/android/main.js start",
+    "test": "node --test test/unit.test.js test/integration.test.js test/setup.test.js test/android.test.js",
     "release": "node scripts/release.js"
   },
   "engines": {
     "node": ">=18"
   },
-  "homepage": "https://gungreeneyes.github.io/Bananarama/",
+  "homepage": "https://gungreeneyes.github.io/Bananarama-Android/",
   "repository": {
     "type": "git",
-    "url": "https://github.com/GunGreenEyes/Bananarama.git"
+    "url": "https://github.com/GunGreenEyes/Bananarama-Android.git"
   },
   "main": "src/lib/client.js"
 }

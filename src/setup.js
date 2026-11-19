@@ -113,7 +113,8 @@ function vars(node = process.execPath) {
     MCP: path.join(SRC, 'mcp.js'),
     SETTINGS: settingsLib.settingsPath(),
     LOG: settingsLib.logPath(),
-    APP: path.resolve(SRC, '..')
+    APP: path.resolve(SRC, '..'),
+    BIN: path.resolve(SRC, '..', 'bin', 'bananarama')
   };
 }
 

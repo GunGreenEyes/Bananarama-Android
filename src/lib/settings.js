@@ -1,7 +1,6 @@
 'use strict';
-// Settings live in %APPDATA%\Bananarama\settings.json (they hold your API key).
-// Missing file -> created from defaults (or migrated from the old in-repo
-// settings.json). Missing keys -> filled from defaults.
+// Settings live in ~/.config/Bananarama/settings.json in Termux (they hold your
+// API key). Missing file -> created from defaults. Missing keys -> filled from defaults.
 // BANANARAMA_SETTINGS overrides the file location (used by the tests).
 const fs = require('fs');
 const os = require('os');
@@ -26,12 +25,14 @@ const DEFAULTS = {
   imageSize: '1K',                  // 1K | 2K | 4K
   host: '127.0.0.1',
   port: 7861,
-  outputDir: '',                    // empty = your real Windows Downloads folder
+  outputDir: '',                    // empty = the phone's shared Pictures folder
   outputSubfolder: 'Nano',          // created inside outputDir; empty = save directly in it
   filenamePrefix: 'image',
   requestTimeoutMs: 180000,
   autoStartServer: true,
-  openAfterSave: false,
+  openAfterSave: false,             // open each image in the Gallery after saving
+  notify: true,                     // Android notification with the finished image
+  wakeLock: true,                   // keep the service alive while the screen is off
   apiBase: 'https://generativelanguage.googleapis.com/v1beta'
 };
 
