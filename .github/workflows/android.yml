@@ -55,6 +55,22 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot
           working-directory: android
           script: ./gradlew --no-daemon :app:connectedDebugAndroidTest
+      - name: Emulator test summary
+        if: always()
+        working-directory: android
+        run: |
+          files=$(find app/build/outputs/androidTest-results -name 'TEST-*.xml' 2>/dev/null)
+          [ -n "$files" ] || { echo "::error::no emulator test results found"; exit 1; }
+          tests=0; failures=0; errors=0
+          for f in $files; do
+            t=$(grep -o 'tests="[0-9]*"' "$f" | head -1 | grep -o '[0-9]*'); tests=$((tests + t))
+            x=$(grep -o 'failures="[0-9]*"' "$f" | head -1 | grep -o '[0-9]*'); failures=$((failures + x))
+            e=$(grep -o 'errors="[0-9]*"' "$f" | head -1 | grep -o '[0-9]*'); errors=$((errors + e))
+          done
+          names=$(grep -ho 'testcase name="[^"]*"' $files | sed 's/testcase name="//; s/"$//' | sort | paste -sd, -)
+          echo "::notice title=Emulator tests::$tests tests, $failures failures, $errors errors: $names"
+          echo "### Emulator: $tests tests, $failures failures, $errors errors" >> "$GITHUB_STEP_SUMMARY"
+          [ "$tests" -gt 0 ] && [ "$failures" -eq 0 ] && [ "$errors" -eq 0 ]
       - uses: actions/upload-artifact@v4
         if: always()
         with:
