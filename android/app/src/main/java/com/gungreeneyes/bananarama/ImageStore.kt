@@ -56,10 +56,10 @@ object ImageStore {
     }
 
     /** Newest images in Pictures/<subfolder>. */
+    @Suppress("DEPRECATION")
     fun recent(context: Context, subfolder: String, limit: Int = 24): List<Item> {
         val out = mutableListOf<Item>()
         val collection = if (Build.VERSION.SDK_INT >= 29) MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY) else MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-        @Suppress("DEPRECATION")
         val (selection, arg) = if (Build.VERSION.SDK_INT >= 29)
             "${MediaStore.Images.Media.RELATIVE_PATH} LIKE ?" to "${Environment.DIRECTORY_PICTURES}/$subfolder/%"
         else "${MediaStore.Images.Media.DATA} LIKE ?" to "%/${Environment.DIRECTORY_PICTURES}/$subfolder/%"
