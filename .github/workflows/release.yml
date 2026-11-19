@@ -1,6 +1,8 @@
 name: release
-# Push a whole-number tag (v1, v2, ...) - usually via `npm run release`. install.sh on
-# the phone installs the latest release, so publishing one is how phones get updates.
+# Push a whole-number tag (v2, v3, ...) - usually via `npm run release` - to publish:
+#   Bananarama.apk          the app (signed with the ANDROID_SIGNING_KEY secret); the website links here
+#   Bananarama-vN.apk       the same file, versioned
+#   bananarama-android-vN.tar.gz   the Termux command-line tools (optional, for Claude Code in Termux)
 on:
   push:
     tags: ['v*']
@@ -14,6 +16,11 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 24
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
       - name: Check tag matches package.json
         run: |
           tag='${{ github.ref_name }}'
@@ -21,17 +28,32 @@ jobs:
           major=$(node -p "require('./package.json').version.split('.')[0]")
           [ "$tag" = "v$major" ] || { echo "tag $tag does not match package.json version $major"; exit 1; }
       - run: npm test
+      - name: Build the signed APK
+        env:
+          SIGNING_KEY: ${{ secrets.ANDROID_SIGNING_KEY }}
+        working-directory: android
+        run: |
+          if [ -z "$SIGNING_KEY" ]; then
+            echo "::error::Add the ANDROID_SIGNING_KEY repository secret (base64 of the release keystore) before releasing."
+            exit 1
+          fi
+          echo "$SIGNING_KEY" | base64 -d > "$RUNNER_TEMP/release.p12"
+          export BANANARAMA_KEYSTORE="$RUNNER_TEMP/release.p12"
+          ./gradlew --no-daemon :core:test :app:testReleaseUnitTest :app:assembleRelease
+          rm -f "$RUNNER_TEMP/release.p12"
       - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           tag='${{ github.ref_name }}'
+          cp android/app/build/outputs/apk/release/app-release.apk Bananarama.apk
+          cp Bananarama.apk "Bananarama-$tag.apk"
           git archive --format=tar.gz --prefix=bananarama/ -o "bananarama-android-$tag.tar.gz" "$tag"
           cat > notes.md <<EOF
-          Install or update on your phone, in Termux:
+          **Install on your phone:** open this page on the phone and tap **Bananarama.apk**, then **Install**.
+          The app asks for your Gemini API key the first time it opens.
 
-          \`\`\`
-          curl -fsSL https://raw.githubusercontent.com/${{ github.repository }}/main/install.sh | bash
-          \`\`\`
+          Claude Code in Termux (optional): \`curl -fsSL https://raw.githubusercontent.com/${{ github.repository }}/main/install.sh | bash\`
           EOF
-          gh release create "$tag" "bananarama-android-$tag.tar.gz" --title "Bananarama for Android $tag" --notes-file notes.md --generate-notes --latest
+          gh release create "$tag" Bananarama.apk "Bananarama-$tag.apk" "bananarama-android-$tag.tar.gz" \
+            --title "Bananarama for Android $tag" --notes-file notes.md --generate-notes --latest

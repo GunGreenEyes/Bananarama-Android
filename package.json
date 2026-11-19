@@ -1,7 +1,7 @@
 {
   "name": "bananarama-android",
-  "version": "1.0.0",
-  "description": "Bananarama for Android: Gemini Nano Banana images on your phone, with a background service, notifications, the share sheet and /image in Claude Code (Termux).",
+  "version": "2.0.0",
+  "description": "Bananarama for Android: a one-tap-install app that makes Gemini Nano Banana images from the Claude app (text selection, share sheet), Quick Settings and Claude Code.",
   "license": "MIT",
   "private": true,
   "bin": {
@@ -9,7 +9,7 @@
   },
   "scripts": {
     "start": "node src/android/main.js start",
-    "test": "node --test test/unit.test.js test/integration.test.js test/setup.test.js test/android.test.js",
+    "test": "node --test test/unit.test.js test/integration.test.js test/setup.test.js test/android.test.js test/app-ui.test.js",
     "release": "node scripts/release.js"
   },
   "engines": {

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Bananarama</string>
+    <string name="process_text_label">Make image</string>
+    <string name="tile_label">New image</string>
+    <string name="shortcut_new_short">New image</string>
+    <string name="shortcut_new_long">Make a new image</string>
+    <string name="channel_jobs">Making images</string>
+    <string name="channel_results">Finished images</string>
+    <string name="channel_api">Claude Code link</string>
+    <string name="making_image">Making image…</string>
+    <string name="image_saved">Image saved</string>
+    <string name="image_failed">Image failed</string>
+    <string name="action_share">Share</string>
+    <string name="action_edit">Edit</string>
+    <string name="action_new">New</string>
+    <string name="action_stop">Stop</string>
+    <string name="share_image">Share image</string>
+    <string name="api_title">Claude Code link is on</string>
+    <string name="api_text">Listening on 127.0.0.1:%1$d for /image in Termux</string>
+    <string name="copied">Copied</string>
+</resources>

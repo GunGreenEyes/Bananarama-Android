@@ -370,7 +370,7 @@ test('bananarama command: start, status, image, test, doctor, stop (Termux tools
     assert.match(r.stdout, /❌ Termux:API app/, 'no Termux here');
 
     r = await cli(['version'], env);
-    assert.match(r.stdout, /^Bananarama for Android v1$/m);
+    assert.match(r.stdout, new RegExp(`^Bananarama for Android v${require('../package.json').version.split('.')[0]}$`, 'm'));
 
     r = await cli(['stop'], env);
     assert.match(r.stdout, /stopped/);
