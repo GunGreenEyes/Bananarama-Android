@@ -60,13 +60,16 @@ jobs:
         working-directory: android
         shell: bash
         run: |
-          files=$(find app/build/outputs/androidTest-results -name 'TEST-*.xml' 2>/dev/null || true)
-          [ -n "$files" ] || { echo "::error title=Emulator tests::no emulator test results found"; exit 1; }
           # one annotation per test, with the first lines of any failure (readable without signing in)
-          node - $files <<'EOF'
+          node - <<'EOF'
           const fs = require('fs');
+          const path = require('path');
+          const find = d => fs.existsSync(d) ? fs.readdirSync(d, { withFileTypes: true }).flatMap(e =>
+            e.isDirectory() ? find(path.join(d, e.name)) : (/^TEST-.*\.xml$/.test(e.name) ? [path.join(d, e.name)] : [])) : [];
+          const files = find('app/build/outputs/androidTest-results');
+          if (!files.length) { console.log('::error title=Emulator tests::no emulator test results found'); process.exit(1); }
           let total = 0, bad = 0;
-          for (const f of process.argv.slice(2)) {
+          for (const f of files) {
             const x = fs.readFileSync(f, 'utf8');
             for (const m of x.matchAll(/<testcase name="([^"]*)"[^>]*?(\/>|>([\s\S]*?)<\/testcase>)/g)) {
               total++;
